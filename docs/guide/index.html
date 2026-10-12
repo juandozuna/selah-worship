@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <title>Selah · Volunteer &amp; ProPresenter Guide</title>
 <style>
-  @page { size: Letter; margin: 0.7in; }
+  @page { size: Letter; margin: 0.65in; }
   :root {
     --ink: #1c2b19;
     --muted: #5a665c;
@@ -17,17 +17,17 @@
     margin: 0;
     color: var(--ink);
     font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-size: 12.5pt;
-    line-height: 1.55;
+    font-size: 11.5pt;
+    line-height: 1.5;
     background: #fff;
   }
   h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
-  h1 { font-size: 28pt; margin: 0 0 0.25em; color: var(--accent); }
-  h2 { font-size: 16pt; margin: 1.4em 0 0.4em; border-bottom: 1px solid var(--line); padding-bottom: 0.2em; }
-  h3 { font-size: 13pt; margin: 1em 0 0.3em; }
-  p, li { margin: 0.45em 0; }
+  h1 { font-size: 26pt; margin: 0 0 0.25em; color: var(--accent); }
+  h2 { font-size: 15pt; margin: 1.2em 0 0.35em; border-bottom: 1px solid var(--line); padding-bottom: 0.15em; page-break-after: avoid; }
+  h3 { font-size: 12pt; margin: 0.9em 0 0.25em; }
+  p, li { margin: 0.4em 0; }
   .cover {
-    min-height: 90vh;
+    min-height: 88vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -35,37 +35,42 @@
     background:
       radial-gradient(ellipse at 20% 10%, #e7efe2 0%, transparent 50%),
       linear-gradient(160deg, #f7faf5, #eef3ea 60%, #e4ebe0);
-    padding: 1.5in 0.8in;
+    padding: 1.2in 0.6in;
   }
-  .brand { font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.28em; text-transform: uppercase; font-size: 11pt; color: var(--accent); font-weight: 700; }
-  .lede { font-size: 14pt; color: var(--muted); max-width: 28em; }
-  .meta { margin-top: 2em; font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: var(--muted); }
-  figure { margin: 1em 0; page-break-inside: avoid; }
-  figure img { width: 100%; border: 1px solid var(--line); border-radius: 8px; }
-  figcaption { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: var(--muted); margin-top: 0.35em; }
+  .brand { font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.28em; text-transform: uppercase; font-size: 10pt; color: var(--accent); font-weight: 700; }
+  .lede { font-size: 13pt; color: var(--muted); max-width: 28em; }
+  .meta { margin-top: 1.6em; font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: var(--muted); }
+  figure { margin: 0.75em 0 1em; page-break-inside: avoid; }
+  figure img {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(28, 43, 25, 0.08);
+  }
+  figcaption { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: var(--muted); margin-top: 0.3em; }
   .card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 0.9em 1em;
-    margin: 0.8em 0;
+    padding: 0.75em 0.9em;
+    margin: 0.7em 0;
     page-break-inside: avoid;
   }
-  ol.steps { padding-left: 1.2em; }
-  ol.steps li { margin: 0.55em 0; }
+  ol.steps { padding-left: 1.15em; }
+  ol.steps li { margin: 0.45em 0; }
   code, kbd {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.88em;
     background: #eef2ec;
-    padding: 0.1em 0.35em;
+    padding: 0.08em 0.3em;
     border-radius: 4px;
   }
-  .cheat { columns: 2; column-gap: 1.5em; }
+  .cheat { columns: 2; column-gap: 1.2em; }
   .cheat .card { break-inside: avoid; }
   footer.page {
-    margin-top: 2em;
+    margin-top: 1.5em;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 9pt;
+    font-size: 8.5pt;
     color: var(--muted);
   }
 </style>
@@ -74,7 +79,7 @@
   <section class="cover">
     <div class="brand">Selah</div>
     <h1>Volunteer &amp; ProPresenter Guide</h1>
-    <p class="lede">How to install Selah, present lyrics, add background and foreground media, and feed transparent lyrics into ProPresenter over NDI or Syphon.</p>
+    <p class="lede">How to install Selah, present lyrics, add background and foreground media, and feed transparent lyrics into ProPresenter over NDI or Syphon. Screenshots below are from the real Selah interface.</p>
     <p class="meta">Version 0.1.0 · For Sunday volunteers and tech teams · macOS Apple Silicon</p>
   </section>
 
@@ -82,67 +87,74 @@
   <ol class="steps">
     <li>Open <strong>Selah_0.1.0_aarch64.dmg</strong> from the GitHub Release.</li>
     <li>Drag <strong>Selah</strong> into <strong>Applications</strong>.</li>
-    <li>Open <strong>Selah-Volunteer-Guide.pdf</strong> from the same disk image (or this printed copy) and keep it near the booth laptop.</li>
+    <li>Keep <strong>Selah-Volunteer-Guide.pdf</strong> from the same disk image near the booth laptop.</li>
     <li>First launch may ask to allow an unsigned app: System Settings → Privacy &amp; Security → Open Anyway.</li>
   </ol>
   <figure>
-    <img src="images/05-install.svg" alt="Install from DMG"/>
-    <figcaption>Figure 1. Install Selah into Applications and keep the volunteer guide handy.</figcaption>
+    <img src="images/06-overview.png" alt="Selah Present overview"/>
+    <figcaption>Figure 1. Selah Present view after install — service order, lyric blocks, and live preview.</figcaption>
   </figure>
 
   <h2>2. Volunteer quick start — present a song</h2>
   <ol class="steps">
     <li>Open Selah. Your last service restores automatically.</li>
-    <li>In <strong>Present</strong>, click a lyric block to put it on air.</li>
+    <li>In <strong>Present</strong>, click a lyric block to put it on air (green “On air”).</li>
     <li>Press <kbd>→</kbd> / <kbd>Space</kbd> for next, <kbd>←</kbd> for previous, <kbd>Esc</kbd> to clear.</li>
     <li>Use <strong>Add content</strong> for songs, paste, OpenLyrics, or Scripture.</li>
   </ol>
   <figure>
-    <img src="images/01-present.svg" alt="Present lyrics"/>
-    <figcaption>Figure 2. Click a block to go live; clear with Escape.</figcaption>
+    <img src="images/01-present.png" alt="Present lyrics on air"/>
+    <figcaption>Figure 2. Amazing Grace Verse 1 on air — live alpha preview on the right, Next in the transport bar.</figcaption>
   </figure>
   <div class="card"><strong>Golden rule:</strong> Nothing goes to the congregation until you click a block (or start a test pattern). Browsing the library does not put lyrics on air.</div>
 
   <h2>3. Layout — where lyrics sit</h2>
   <ol class="steps">
     <li>Open <strong>Layout</strong>.</li>
-    <li>Choose a preset (centered, lower-third, bilingual) or drag regions.</li>
-    <li>Click <strong>Apply</strong>. Live items keep the previous layout until you present again.</li>
+    <li>Choose a preset (centered, lower-third, bilingual) or drag regions on the canvas.</li>
+    <li>Click <strong>Apply layout</strong>. Live items keep the previous layout until you present again.</li>
   </ol>
   <figure>
-    <img src="images/02-layout.svg" alt="Layout editor"/>
-    <figcaption>Figure 3. Place lyric regions; apply before the next present action.</figcaption>
+    <img src="images/02-layout.png" alt="Layout editor"/>
+    <figcaption>Figure 3. Layout editor — presets, canvas, and region properties for the NDI / Syphon stream.</figcaption>
   </figure>
 
-  <h2>4. Background &amp; foreground media (standalone look)</h2>
+  <h2>4. Background &amp; foreground media</h2>
   <p>Selah can show an image or video <em>behind</em> lyrics and another <em>in front</em> of lyrics. The physical display always shows this composite. NDI/Syphon only include media when you turn that on in Settings.</p>
   <ol class="steps">
     <li>In <strong>Layout</strong>, use <strong>Add background media</strong> or <strong>Add foreground media</strong>.</li>
     <li>Pick an image (PNG/JPEG/WebP) or video (MP4/MOV/WebM).</li>
-    <li>Adjust opacity, fit (cover / contain / fill), and for video: mute and audio output device.</li>
+    <li>Adjust opacity, fit, and for video: mute and audio output device.</li>
     <li>Apply the layout. Start <strong>Display output</strong> in Settings for a full-screen standalone screen.</li>
   </ol>
   <figure>
-    <img src="images/03-media.svg" alt="Media layers"/>
-    <figcaption>Figure 4. Background under lyrics, foreground over lyrics, with optional video audio routing.</figcaption>
+    <img src="images/03-media.png" alt="Media layers in Layout"/>
+    <figcaption>Figure 4. Media Layers in the Layout sidebar — background and foreground controls above the canvas.</figcaption>
   </figure>
 
-  <h2>5. ProPresenter integration (NDI / Syphon)</h2>
+  <h2>5. Library</h2>
+  <p>Open <strong>Library</strong> to browse saved songs and Scripture, search locally, and add items to the service.</p>
+  <figure>
+    <img src="images/05-library.png" alt="Library view"/>
+    <figcaption>Figure 5. Library — your collection ready for this Sunday.</figcaption>
+  </figure>
+
+  <h2>6. ProPresenter integration (NDI / Syphon)</h2>
   <p>Selah does not remote-control ProPresenter. It sends a lyric video feed that ProPresenter (or any NDI/Syphon receiver) can use as an input source.</p>
   <ol class="steps">
-    <li>In Selah <strong>Settings → Output</strong>, leave <strong>Send media on NDI / Syphon</strong> <em>unchecked</em> for transparent lyrics (recommended with ProPresenter).</li>
+    <li>Open <strong>Settings → Output</strong>.</li>
+    <li>Leave <strong>Send media on NDI / Syphon</strong> <em>unchecked</em> for transparent lyrics (recommended with ProPresenter).</li>
     <li>Set the feed name (default <code>Selah Lyrics</code>).</li>
     <li>Click <strong>Start</strong> on NDI (network) and/or Syphon (same Mac).</li>
     <li>In ProPresenter, add an NDI or Syphon input / source and select the Selah feed.</li>
-    <li>Layer that source over your ProPresenter look, or key on alpha if your workflow supports it.</li>
   </ol>
   <figure>
-    <img src="images/04-propresenter.svg" alt="ProPresenter via NDI"/>
-    <figcaption>Figure 5. Transparent lyric feed into ProPresenter; enable media on the stream only when you want a full composite.</figcaption>
+    <img src="images/04-settings.png" alt="Output settings for NDI and Syphon"/>
+    <figcaption>Figure 6. Settings → Output — feed name, Send media toggle, and NDI / Syphon Start buttons.</figcaption>
   </figure>
   <div class="card"><strong>When to enable “Send media on NDI / Syphon”:</strong> Use it for a portable standalone output (media + lyrics baked together). Leave it off when ProPresenter or a switcher should supply the background.</div>
 
-  <h2>6. Volunteer cheat sheet</h2>
+  <h2>7. Volunteer cheat sheet</h2>
   <div class="cheat">
     <div class="card"><strong>Go live</strong><br/>Click a lyric block</div>
     <div class="card"><strong>Next / previous</strong><br/><kbd>→</kbd> <kbd>Space</kbd> / <kbd>←</kbd></div>
@@ -154,11 +166,11 @@
     <div class="card"><strong>ProPresenter</strong><br/>Transparent feed → NDI/Syphon input</div>
   </div>
 
-  <h2>7. Troubleshooting</h2>
+  <h2>8. Troubleshooting</h2>
   <ul>
     <li><strong>NDI missing:</strong> Install the NDI runtime, then restart Selah.</li>
     <li><strong>Syphon missing:</strong> Install Syphon.framework in <code>/Library/Frameworks</code> (macOS only).</li>
-    <li><strong>No lyrics in ProPresenter:</strong> Confirm Selah shows LIVE, the feed is Started, and the feed name matches.</li>
+    <li><strong>No lyrics in ProPresenter:</strong> Confirm Selah shows On air, the feed is Started, and the feed name matches.</li>
     <li><strong>Video has no sound:</strong> Unmute the media layer and pick an audio output device.</li>
     <li><strong>Unsigned app blocked:</strong> Privacy &amp; Security → Open Anyway.</li>
   </ul>

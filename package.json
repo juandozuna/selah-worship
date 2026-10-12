@@ -19,7 +19,9 @@
     "desktop": "tauri dev",
     "predesktop:build": "node scripts/check-node.mjs",
     "desktop:build": "CARGO_PROFILE_RELEASE_STRIP=none tauri build",
+    "screenshots": "npm run build && node scripts/capture-screenshots.mjs",
     "guide:pdf": "node scripts/build-guide-pdf.mjs",
+    "docs:refresh": "npm run screenshots && npm run guide:pdf",
     "dmg:extras": "node scripts/prepare-dmg-extras.mjs",
     "dmg:package": "bash scripts/package-dmg.sh",
     "prepreview:file": "node scripts/check-node.mjs",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",
     "@types/react": "19.2.18",
+    "playwright": "^1.64.0",
     "tsx": "4.21.0",
     "typescript": "5.9.3",
     "vite": "6.4.3"

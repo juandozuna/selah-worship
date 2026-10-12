@@ -2,6 +2,28 @@
 
 A worship lyric presentation app for macOS and Windows. One shared React interface and Rust core; a transparent canvas feeds NDI or macOS Syphon receivers.
 
+**Download:** [latest release](https://github.com/juandozuna/selah-worship/releases/latest) · **Site:** [juandozuna.github.io/selah-worship](https://juandozuna.github.io/selah-worship/) · **Volunteer guide:** [PDF](docs/guide/Selah-Volunteer-Guide.pdf)
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-present.png" alt="Selah Present view with lyrics on air" width="900"/>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/02-layout.png" alt="Selah Layout editor" width="440"/>
+  &nbsp;
+  <img src="docs/screenshots/04-settings.png" alt="Selah Settings NDI Syphon output" width="440"/>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/05-library.png" alt="Selah Library" width="440"/>
+  &nbsp;
+  <img src="docs/screenshots/03-media.png" alt="Selah media layers in Layout" width="440"/>
+</p>
+
+Regenerate screenshots after UI changes: `npm run screenshots`.
+
 ## Try the interface
 
 Requires Node 22.9+ and npm. Installation and activation are separate: an existing terminal can still use an older Node after you install a newer one. Run `npm run doctor` to see the active version and executable. If you use nvm, `nvm use` selects the project's Node 22 version; `nvm use 23` also works if that is the version you already installed.
