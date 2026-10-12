@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a2420"/><stop offset="100%" stop-color="#0e1411"/></linearGradient></defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <rect x="40" y="40" width="1200" height="640" rx="18" fill="#151917" stroke="#303731"/>
+  <circle cx="78" cy="88" r="10" fill="#c5d9ac"/>
+  <text x="104" y="94" fill="#c5d9ac" font-size="20" font-family="Arial,sans-serif" font-weight="700">SELAH</text>
+  <text x="80" y="170" fill="#eceee8" font-size="36" font-family="Georgia, serif">Present lyrics</text>
+  <text x="80" y="220" fill="#d5dbd4" font-size="22" font-family="Georgia, serif">Click a block to put it on air.</text><text x="80" y="262" fill="#d5dbd4" font-size="22" font-family="Georgia, serif">Arrow keys or Space advance.</text><text x="80" y="304" fill="#d5dbd4" font-size="22" font-family="Georgia, serif">Escape clears the output.</text>
+  <text x="80" y="640" fill="#8e998f" font-size="16" font-family="Arial,sans-serif">Selah · Worship, in focus</text>
+</svg>

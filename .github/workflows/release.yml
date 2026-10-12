@@ -1,0 +1,54 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Ensure guide PDF
+        run: |
+          if [ ! -f docs/guide/Selah-Volunteer-Guide.pdf ]; then
+            echo "Guide PDF must be committed at docs/guide/Selah-Volunteer-Guide.pdf"
+            exit 1
+          fi
+          npm run dmg:extras
+      - run: npm run desktop:build
+      - name: Collect artifacts
+        run: |
+          mkdir -p release-assets
+          cp docs/guide/Selah-Volunteer-Guide.pdf release-assets/
+          DMG=$(ls src-tauri/target/release/bundle/dmg/*.dmg | head -1)
+          cp "$DMG" release-assets/
+          # Place the guide beside the app in a zip for operators who skip the DMG layout extras
+          APP=$(ls -d src-tauri/target/release/bundle/macos/*.app | head -1)
+          ditto -c -k --sequesterRsrc --keepParent "$APP" release-assets/Selah.app.zip
+          ls -la release-assets
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          body: |
+            ## Selah ${{ github.ref_name }}
+
+            - macOS Apple Silicon DMG (unsigned)
+            - Volunteer & ProPresenter guide PDF
+            - Background / foreground media layers
+            - Optional NDI/Syphon stream composite
+
+            Install: open the DMG, drag **Selah** to Applications, keep the PDF for volunteers.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,25 @@
+name: Validate desktop app
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: npm run assets
+      - run: cargo check --manifest-path src-tauri/Cargo.toml
+      - run: npm run desktop:build -- --no-bundle

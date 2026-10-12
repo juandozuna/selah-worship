@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "description": "Main and display windows",
+  "windows": ["main", "display"],
+  "permissions": ["core:default"]
+}

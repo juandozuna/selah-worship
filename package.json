@@ -1,0 +1,48 @@
+{
+  "name": "selah-worship",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "doctor": "node scripts/check-node.mjs",
+    "predev": "node scripts/check-node.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "node scripts/check-node.mjs",
+    "build": "tsc --noEmit && vite build",
+    "pretest": "node scripts/check-node.mjs",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "predev:lan": "node scripts/check-node.mjs",
+    "dev:lan": "vite --host 0.0.0.0",
+    "prepreview:lan": "node scripts/check-node.mjs",
+    "preview:lan": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
+    "predesktop": "node scripts/check-node.mjs",
+    "desktop": "tauri dev",
+    "predesktop:build": "node scripts/check-node.mjs",
+    "desktop:build": "CARGO_PROFILE_RELEASE_STRIP=none tauri build",
+    "guide:pdf": "node scripts/build-guide-pdf.mjs",
+    "dmg:extras": "node scripts/prepare-dmg-extras.mjs",
+    "dmg:package": "bash scripts/package-dmg.sh",
+    "prepreview:file": "node scripts/check-node.mjs",
+    "preview:file": "node scripts/preview.mjs",
+    "prepreview": "node scripts/check-node.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "preassets": "node scripts/check-node.mjs",
+    "assets": "node scripts/prepare-assets.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.3",
+    "lucide-react": "0.546.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "19.2.18",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "vite": "6.4.3"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  }
+}

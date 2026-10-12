@@ -1,0 +1,11 @@
+[package]
+name = "selah-renderer"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+selah-domain = { path = "../domain" }
+resvg = "0.45"
+wgpu = "0.19"
+pollster = "0.3"
+rustybuzz = "0.20"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }

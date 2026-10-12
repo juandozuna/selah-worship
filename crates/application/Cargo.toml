@@ -1,0 +1,8 @@
+[package]
+name = "selah-application"
+version.workspace = true
+edition.workspace = true
+[dependencies]
+selah-domain.workspace = true
+serde.workspace = true
+serde_json.workspace = true

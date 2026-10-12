@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Selah",
+  "version": "0.1.0",
+  "identifier": "com.selah.worship",
+  "build": {
+    "beforeDevCommand": "npm run assets && npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run assets && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Selah \u00b7 Worship, in focus",
+        "width": 1360,
+        "height": 900,
+        "minWidth": 960,
+        "minHeight": 640,
+        "backgroundColor": "#151917"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob: asset: http://asset.localhost file: media:; media-src 'self' data: blob: asset: http://asset.localhost file: media:; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPDATA/**", "$APPLOCALDATA/**", "$HOME/**", "**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Worship lyrics, in focus",
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    },
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": true
+      }
+    },
+    "resources": {
+      "../assets/bibles/": "bibles/",
+      "../assets/runtime/": "runtime/",
+      "../assets/model.json": "model.json",
+      "../docs/guide/Selah-Volunteer-Guide.pdf": "Selah-Volunteer-Guide.pdf"
+    },
+    "icon": [
+      "icons/icon.png"
+    ]
+  }
+}

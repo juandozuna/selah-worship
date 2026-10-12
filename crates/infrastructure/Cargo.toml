@@ -1,0 +1,15 @@
+[package]
+name = "selah-infrastructure"
+version.workspace = true
+edition.workspace = true
+[dependencies]
+selah-domain.workspace = true
+selah-application.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+quick-xml = "0.37.5"
+regex = "1"
+zip = { version = "2.4.2", default-features = false, features = ["deflate"] }
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
