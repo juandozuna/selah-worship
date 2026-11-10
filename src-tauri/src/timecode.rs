@@ -333,7 +333,7 @@ fn schedule(c: &mut Core, frame: u64) -> Vec<PresentationCommand> {
         return Vec::new();
     }
     let previous = c.previous.replace(frame);
-    if c.status.chase_paused {
+    if c.status.armed_source != ChaseSource::None && c.status.chase_paused {
         return Vec::new();
     }
     if previous == Some(frame) {
@@ -557,6 +557,14 @@ mod tests {
         );
     }
     #[test]
+    fn internal_playback_can_resume_while_external_chase_stays_paused() {
+        let mut c = Core::default();
+        c.status.chase_paused = true;
+        c.status.timeline_playing = true;
+        assert_eq!(schedule(&mut c, 1).len(), 1);
+        assert!(c.status.chase_paused);
+    }
+    #[test]
     fn delayed_queue_ack_does_not_rewind_internal_clock() {
         let mut c = Core::default();
         let status = ControlStatus {
@@ -698,6 +706,7 @@ mod tests {
         assert!(schedule(&mut c, 3).is_empty());
         schedule(&mut c, 0);
         assert_eq!(schedule(&mut c, 2).len(), 3);
+        c.status.armed_source = ChaseSource::Mtc;
         c.status.chase_paused = true;
         assert!(schedule(&mut c, 4).is_empty());
     }
