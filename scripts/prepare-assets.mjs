@@ -9,7 +9,7 @@ await mkdir('assets/bibles',{recursive:true});await mkdir('assets/runtime',{recu
 for(const id of ['engwebp','spaRV1909']){const name=`${id}_vpl.zip`,path=join('assets/bibles',name);if(!await exists(path)){console.log(`Downloading ${id} from eBible.org…`);await writeFile(path,await fetchBytes(`https://ebible.org/Scriptures/${name}`));}}
 const runtime=join('assets/runtime',process.platform==='win32'?'llama-server.exe':'llama-server');
 if(!await exists(runtime)){
-  const response=await fetch('https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10',{headers:{'User-Agent':'Selah-build/0.1'}});if(!response.ok)throw new Error('Could not load official llama.cpp release manifest');const releases=await response.json();
+  const response=await fetch('https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10',{headers:{'User-Agent':'Selah-build/0.2',...(process.env.GITHUB_TOKEN?{Authorization:`Bearer ${process.env.GITHUB_TOKEN}`}:{})},signal:AbortSignal.timeout(30000)});if(!response.ok)throw new Error(`Could not load official llama.cpp release manifest (HTTP ${response.status})`);const releases=await response.json();
   const suffix=process.platform==='darwin'?'bin-macos-arm64.tar.gz':process.platform==='win32'?'bin-win-vulkan-x64.zip':null;
   if(!suffix)throw new Error('Runtime packaging supports Apple Silicon macOS and Windows x64');
   // "latest" can point at an unrelated tag, so use the newest release that ships this platform's verified binary.

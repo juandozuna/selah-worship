@@ -8,6 +8,8 @@ permissions:
 jobs:
   macos:
     runs-on: macos-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +17,16 @@ jobs:
           node-version: '22'
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: npm install
+      - name: Read release version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" != "v$VERSION" ]]; then
+            echo "Tag must match package version" >&2
+            exit 1
+          fi
+      - run: npm ci
       - run: npm test
       - run: npm run build
       - name: Ensure guide PDF
@@ -25,7 +36,11 @@ jobs:
             exit 1
           fi
           npm run dmg:extras
-      - run: npm run desktop:build
+      - run: npm run assets
+      - run: cargo test --workspace
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - run: npm run desktop:build -- --bundles app
+      - run: npm run dmg:package
       - name: Collect artifacts
         run: |
           mkdir -p release-assets
@@ -39,15 +54,21 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.version.outputs.version }}
+          fail_on_unmatched_files: true
           files: release-assets/*
           generate_release_notes: true
           body: |
-            ## Selah ${{ github.ref_name }}
+            ## Selah v${{ steps.version.outputs.version }}
 
             - macOS Apple Silicon DMG (unsigned)
             - Volunteer & ProPresenter guide PDF
-            - Background / foreground media layers
-            - Optional NDI/Syphon stream composite
+            - MIDI mapping and learn, OSC commands, MTC/LTC chase, and timeline cues
+            - Custom TTF/OTF font imports
+            - Background / foreground media layers and optional NDI/Syphon composite
+
+            Requires Apple Silicon and macOS 12+. This build is unsigned and not notarized.
+            Physical MIDI/LTC devices and NDI/Syphon receivers still need hardware validation.
 
             Install: open the DMG, drag **Selah** to Applications, keep the PDF for volunteers.
         env:

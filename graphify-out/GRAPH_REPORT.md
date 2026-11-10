@@ -1,20 +1,25 @@
-# Graph Report - LyricPassingPresentationSoftware  (2026-10-12)
+# Graph Report - LyricPassingPresentationSoftware  (2026-11-10)
 
 ## Corpus Check
-- 73 files · ~63,468 words
+- 89 files · ~195,396 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 901 nodes · 1941 edges · 57 communities (50 shown, 7 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.8)
+- 1124 nodes · 2431 edges · 65 communities (59 shown, 6 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `bef2eab3`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Canvas.tsx
 - main.rs
 - scripts
 - LiveSnapshot
-- application/src/lib.rs
+- timecode.rs
 - model.ts
 - bundle
 - NdiPublisher
@@ -41,81 +46,89 @@
 - Capability
 - Capability
 - selah-desktop
-- description
+- renderer/src/lib.rs
 - react-dom.d.ts
-- SqliteStore
+- application/src/lib.rs
 - App.tsx
-- songSearch.ts
+- SongSearch
 - MotionPicker.tsx
 - check-node.mjs
 - LiveTranslator
 - desktop-schema.json
-- PermissionEntry
+- control.rs
 - types.ts
 - local
 - LayoutEditor.tsx
 - remote.rs
 - devDependencies
 - dependencies
-- SongSearch
+- listen
 - package.json
 - build-guide-pdf.mjs
 - prepare-dmg-extras.mjs
 - package-dmg.sh
 - main.js
+- osc.rs
+- ContentDialog.tsx
+- capture-screenshots.mjs
+- files
+- Native control adapters (Wave 2)
+- macOS-schema.json
+- Presentation command bus, Wave 1
+- local
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppState` - 33 edges
-2. `blocking()` - 29 edges
-3. `LiveSnapshot` - 28 edges
-4. `dispatch()` - 26 edges
-5. `scripts` - 25 edges
+1. `AppState` - 40 edges
+2. `blocking()` - 37 edges
+3. `dispatch()` - 34 edges
+4. `LiveSnapshot` - 31 edges
+5. `scripts` - 27 edges
 6. `desktop()` - 23 edges
-7. `invoke()` - 21 edges
-8. `App()` - 19 edges
-9. `PresentationBlock` - 17 edges
-10. `ensure_local_worker()` - 15 edges
+7. `invoke()` - 22 edges
+8. `App()` - 21 edges
+9. `Runtime` - 19 edges
+10. `PresentationBlock` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SyphonPublisher` --implements--> `OutputPublisher`  [EXTRACTED]
   src-tauri/src/output.rs → crates/application/src/lib.rs
+- `raw()` --references--> `MidiMessage`  [EXTRACTED]
+  src-tauri/src/midi.rs → crates/domain/src/control.rs
 - `analyze_lyrics()` --references--> `PresentationBlock`  [EXTRACTED]
   src-tauri/src/main.rs → crates/domain/src/lib.rs
 - `import_openlyrics()` --references--> `PresentationBlock`  [EXTRACTED]
   src-tauri/src/main.rs → crates/domain/src/lib.rs
 - `DisplayFrame` --references--> `LiveSnapshot`  [EXTRACTED]
   src-tauri/src/display.rs → crates/domain/src/lib.rs
-- `DisplayState` --references--> `LiveSnapshot`  [EXTRACTED]
-  src-tauri/src/display.rs → crates/domain/src/lib.rs
 
 ## Import Cycles
 - None detected.
 
-## Communities (57 total, 7 thin omitted)
+## Communities (65 total, 6 thin omitted)
 
 ### Community 0 - "Canvas.tsx"
-Cohesion: 0.13
-Nodes (28): Canvas(), clamp(), Drag, frameKey(), Guide, HANDLES, Mode, Rect (+20 more)
+Cohesion: 0.14
+Nodes (26): Canvas(), clamp(), Drag, frameKey(), Guide, HANDLES, Mode, Rect (+18 more)
 
 ### Community 1 - "main.rs"
-Cohesion: 0.15
-Nodes (57): FnOnce, MediaAsset, OutputStatus, analyze_lyrics(), AppState, AudioDeviceInfo, bible_lookup(), bible_translations() (+49 more)
+Cohesion: 0.12
+Nodes (72): CommandIntent, FnOnce, MediaAsset, OutputStatus, analyze_lyrics(), apply_presentation_command(), AppState, AudioDeviceInfo (+64 more)
 
 ### Community 2 - "scripts"
-Cohesion: 0.08
-Nodes (25): scripts, assets, build, desktop, desktop:build, dev, dev:lan, dmg:extras (+17 more)
+Cohesion: 0.07
+Nodes (27): scripts, assets, build, desktop, desktop:build, dev, dev:lan, dmg:extras (+19 more)
 
 ### Community 3 - "LiveSnapshot"
-Cohesion: 0.07
-Nodes (52): clear(), block_overrides_song_overrides_project(), CanvasLayout, default_fit(), DisplayOutput, LiveSnapshot, MediaAsset, MediaLayer (+44 more)
+Cohesion: 0.08
+Nodes (43): clear(), apply_presentation_command(), CommandIntent, ControlStatus, manual_pause_resync_and_exclusive_chase(), navigation_boundaries_and_clear_preserve_media(), project(), ChaseSource (+35 more)
 
-### Community 4 - "application/src/lib.rs"
-Cohesion: 0.20
-Nodes (20): ai_line_limits_preserve_source_coverage_and_sections(), apply_analysis(), apply_analysis_with_lines(), clear_with_media(), labels_and_accents_survive_split(), load_project(), normalized(), parse_passage() (+12 more)
+### Community 4 - "timecode.rs"
+Cohesion: 0.09
+Nodes (36): JoinHandle, accept_status(), clock_commands(), CommandEvent, Core, cues_cross_frames_preserve_ties_and_rearm_after_rewind(), delayed_queue_ack_does_not_rewind_internal_clock(), label_frames() (+28 more)
 
 ### Community 5 - "model.ts"
-Cohesion: 0.15
-Nodes (20): hymn(), clearLive(), CUT_MOTION, DIRECTIONS, EASINGS, fold(), ORDERS, portableProject() (+12 more)
+Cohesion: 0.12
+Nodes (25): ContentDialog(), hymn(), preset(), seed, clearLive(), CUT_MOTION, DIRECTIONS, EASINGS (+17 more)
 
 ### Community 6 - "bundle"
 Cohesion: 0.05
@@ -150,12 +163,12 @@ Cohesion: 0.28
 Nodes (12): CredentialStore, Credential, FileTime, get(), c_void, Result, String, Vec (+4 more)
 
 ### Community 14 - "Selah"
-Cohesion: 0.10
-Nodes (17): Content and intelligence, Desktop integration, Release acceptance, Reliability and accessibility, Sources and third-party components, Architecture, Automatic song search and local preparation, Desktop app with built-in network access (+9 more)
+Cohesion: 0.09
+Nodes (20): Content and intelligence, Desktop integration, Release acceptance, Reliability and accessibility, Sources and third-party components, Architecture, Automatic song search and local preparation, Desktop app with built-in network access (+12 more)
 
 ### Community 15 - "definitions"
-Cohesion: 0.13
-Nodes (14): anyOf, definitions, Number, Target, Value, description, anyOf, description (+6 more)
+Cohesion: 0.15
+Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 16 - "properties"
 Cohesion: 0.15
@@ -191,7 +204,7 @@ Nodes (9): description, properties, required, type, CapabilityRemote, urls, urls
 
 ### Community 24 - "properties"
 Cohesion: 0.15
-Nodes (13): properties, Identifier, description, oneOf, type, default, description, type (+5 more)
+Nodes (13): properties, Identifier, default, description, type, description, oneOf, type (+5 more)
 
 ### Community 25 - "CapabilityRemote"
 Cohesion: 0.22
@@ -213,57 +226,61 @@ Nodes (6): description, required, type, Capability, identifier, permissions
 Cohesion: 0.80
 Nodes (5): selah-application, selah-desktop, selah-domain, selah-infrastructure, selah-renderer
 
-### Community 31 - "description"
-Cohesion: 0.50
-Nodes (4): default, description, type, description
-
-### Community 33 - "SqliteStore"
+### Community 31 - "renderer/src/lib.rs"
 Cohesion: 0.13
-Nodes (22): Connection, BibleRepository, BibleVerse, bibleworks_aliases_map_to_canonical_books(), openlyrics(), Result, String, Vec (+14 more)
+Nodes (31): TextRegion, anim_total(), animated_text_grows_into_the_settled_frame(), effective_anim(), escape(), font_family(), fonts(), Frame (+23 more)
+
+### Community 33 - "application/src/lib.rs"
+Cohesion: 0.08
+Nodes (42): Connection, ai_line_limits_preserve_source_coverage_and_sections(), apply_analysis(), apply_analysis_with_lines(), BibleRepository, clear_with_media(), labels_and_accents_survive_split(), load_project() (+34 more)
 
 ### Community 34 - "App.tsx"
-Cohesion: 0.18
+Cohesion: 0.16
 Nodes (23): App(), detectRemote(), download(), hasWelcomed(), invoke(), load(), present(), rememberWelcome() (+15 more)
 
-### Community 35 - "songSearch.ts"
-Cohesion: 0.31
-Nodes (4): SearchState, songQuery(), SongSearchCache, Candidate
+### Community 35 - "SongSearch"
+Cohesion: 0.22
+Nodes (5): SearchState, songQuery(), SongSearch, SongSearchCache, Candidate
 
 ### Community 36 - "MotionPicker.tsx"
-Cohesion: 0.15
-Nodes (14): A, B, DIRECTIONS, EASINGS, MotionEditor(), MotionOverrideEditor(), moves, select() (+6 more)
+Cohesion: 0.12
+Nodes (17): A, B, DIRECTIONS, EASINGS, MotionEditor(), MotionOverrideEditor(), moves, select() (+9 more)
 
 ### Community 43 - "desktop-schema.json"
 Cohesion: 0.40
 Nodes (4): anyOf, description, $schema, title
 
-### Community 44 - "PermissionEntry"
-Cohesion: 0.67
-Nodes (3): PermissionEntry, anyOf, description
+### Community 44 - "control.rs"
+Cohesion: 0.14
+Nodes (21): ChaseSource, CommandOrigin, font_paths_are_portable(), FontAsset, legacy(), legacy_defaults_and_wire_format(), MidiBinding, MidiMap (+13 more)
 
 ### Community 45 - "types.ts"
-Cohesion: 0.14
-Nodes (15): Frame, Plan, translationLanguages, translationLayout(), TranslationStatus, DisplayInfo, DisplayOutput, DisplayOverview (+7 more)
+Cohesion: 0.11
+Nodes (29): applyMidiLearn(), MidiLearnEvent, DEFAULT_MIDI_MAP, DEFAULT_OSC_SETTINGS, DEFAULT_TIMECODE_SETTINGS, frames(), source(), validateControlContracts() (+21 more)
 
 ### Community 46 - "local"
 Cohesion: 0.50
 Nodes (4): default, description, type, local
 
 ### Community 47 - "LayoutEditor.tsx"
-Cohesion: 0.19
-Nodes (21): desktop(), overflowRegions(), preset(), LayoutBuilder(), LayoutEditor(), Target, fullBleedLayer(), importMedia() (+13 more)
+Cohesion: 0.18
+Nodes (22): desktop(), overflowRegions(), registered, registerFontAsset(), registerProjectFonts(), LayoutBuilder(), LayoutEditor(), Target (+14 more)
 
 ### Community 48 - "remote.rs"
 Cohesion: 0.24
 Nodes (16): Request, arg(), handle(), header(), json(), lan_address(), reply(), AppHandle (+8 more)
 
 ### Community 49 - "devDependencies"
-Cohesion: 0.18
-Nodes (11): devDependencies, @tauri-apps/cli, tsx, @types/react, typescript, vite, @tauri-apps/cli, tsx (+3 more)
+Cohesion: 0.15
+Nodes (13): devDependencies, playwright, @tauri-apps/cli, tsx, @types/react, typescript, vite, playwright (+5 more)
 
 ### Community 50 - "dependencies"
 Cohesion: 0.22
 Nodes (9): lucide-react, dependencies, lucide-react, react, react-dom, @tauri-apps/api, react, react-dom (+1 more)
+
+### Community 51 - "listen"
+Cohesion: 0.15
+Nodes (16): MidiInputConnection, Device, devices(), listen(), raw(), AppHandle, Arc, Clock (+8 more)
 
 ### Community 52 - "package.json"
 Cohesion: 0.29
@@ -277,25 +294,57 @@ Nodes (4): html, pdf, result, root
 Cohesion: 0.40
 Nodes (4): dest, destDir, pdf, root
 
+### Community 57 - "osc.rs"
+Cohesion: 0.23
+Nodes (13): OscMessage, OscPacket, bind(), emit(), parse(), poll(), Option, PresentationCommand (+5 more)
+
+### Community 58 - "ContentDialog.tsx"
+Cohesion: 0.33
+Nodes (7): en, es, Modal(), cache, LinesPerBlock(), SongWebSearch(), Verse
+
+### Community 59 - "capture-screenshots.mjs"
+Cohesion: 0.27
+Nodes (9): dismissWelcome(), main(), mime, outGuide, outReadme, outSite, root, serveDist() (+1 more)
+
+### Community 60 - "files"
+Cohesion: 0.22
+Nodes (8): capturedAt, files, 01-present.png, 02-layout.png, 03-media.png, 04-settings.png, 05-library.png, 06-overview.png
+
+### Community 61 - "Native control adapters (Wave 2)"
+Cohesion: 0.40
+Nodes (4): Invokes, Native control adapters (Wave 2), Protocol details, Validation
+
+### Community 62 - "macOS-schema.json"
+Cohesion: 0.40
+Nodes (4): anyOf, description, $schema, title
+
+### Community 63 - "Presentation command bus, Wave 1"
+Cohesion: 0.50
+Nodes (3): Persisted contracts and Wave 2 hooks, Presentation command bus, Wave 1, Tauri and LAN API
+
+### Community 64 - "local"
+Cohesion: 0.50
+Nodes (4): default, description, type, local
+
 ## Knowledge Gaps
-- **215 isolated node(s):** `name`, `version`, `private`, `type`, `doctor` (+210 more)
+- **243 isolated node(s):** `CommandOrigin`, `capturedAt`, `01-present.png`, `02-layout.png`, `03-media.png` (+238 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AppState` connect `main.rs` to `SqliteStore`, `LiveSnapshot`, `display.rs`, `composite.rs`, `PresentationBlock`?**
-  _High betweenness centrality (0.059) - this node is a cross-community bridge._
-- **Why does `LiveSnapshot` connect `LiveSnapshot` to `main.rs`, `application/src/lib.rs`, `display.rs`, `composite.rs`, `PresentationBlock`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
-- **Why does `LocalWorker` connect `PresentationBlock` to `main.rs`, `ManagedProcess`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **What connects `name`, `version`, `private` to the rest of the system?**
-  _215 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `AppState` connect `main.rs` to `application/src/lib.rs`, `timecode.rs`, `display.rs`, `composite.rs`, `PresentationBlock`, `renderer/src/lib.rs`?**
+  _High betweenness centrality (0.090) - this node is a cross-community bridge._
+- **Why does `LiveSnapshot` connect `LiveSnapshot` to `application/src/lib.rs`, `main.rs`, `display.rs`, `composite.rs`, `PresentationBlock`, `renderer/src/lib.rs`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Why does `Runtime` connect `timecode.rs` to `main.rs`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
+- **Are the 25 inferred relationships involving `dispatch()` (e.g. with `analyze_lyrics()` and `apply_presentation_command()`) actually correct?**
+  _`dispatch()` has 25 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `CommandOrigin`, `capturedAt`, `01-present.png` to the rest of the system?**
+  _243 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Canvas.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12873563218390804 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
 - **Should `main.rs` be split into smaller, more focused modules?**
-  _Cohesion score 0.1482153660012099 - nodes in this community are weakly interconnected._
-- **Should `scripts` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.121765601217656 - nodes in this community are weakly interconnected._

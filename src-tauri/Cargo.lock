@@ -4044,7 +4044,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "selah-application"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "selah-domain",
  "serde",
@@ -4053,7 +4053,7 @@ dependencies = [
 
 [[package]]
 name = "selah-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "cc",
@@ -4077,7 +4077,7 @@ dependencies = [
 
 [[package]]
 name = "selah-domain"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -4085,7 +4085,7 @@ dependencies = [
 
 [[package]]
 name = "selah-infrastructure"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "libc",
  "quick-xml 0.37.5",
@@ -4100,7 +4100,7 @@ dependencies = [
 
 [[package]]
 name = "selah-renderer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "image",
  "pollster 0.3.0",

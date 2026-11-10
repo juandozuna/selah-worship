@@ -4,6 +4,16 @@ A worship lyric presentation app for macOS and Windows. One shared React interfa
 
 **Download:** [latest release](https://github.com/juandozuna/selah-worship/releases/latest) · **Site:** [juandozuna.github.io/selah-worship](https://juandozuna.github.io/selah-worship/) · **Volunteer guide:** [PDF](docs/guide/Selah-Volunteer-Guide.pdf)
 
+## Install Selah 0.2.0
+
+Download the [Apple Silicon Mac installer](https://github.com/juandozuna/selah-worship/releases/download/v0.2.0/Selah_0.2.0_aarch64.dmg) for macOS 12+. Open the DMG and drag Selah to Applications. This release is unsigned and not notarized; if macOS blocks launch, open System Settings → Privacy & Security → Open Anyway after attempting to open the app. The DMG includes the volunteer guide. Windows and Intel Mac installers are not included.
+
+Follow the [first-service instructions](https://juandozuna.github.io/selah-worship/#getting-started) for content, layout, presenting, outputs, and show control.
+
+### New in 0.2.0
+
+MIDI input mapping and learn, OSC presentation commands, MTC/LTC chase, timeline cue editing/playback, and TTF/OTF font imports. Configure controllers in Settings and cues in Present → Timeline. Manual navigation can pause chase; Re-sync resumes it. Physical MIDI/LTC devices and NDI/Syphon receivers require hardware validation before use in a service.
+
 ## Screenshots
 
 <p align="center">

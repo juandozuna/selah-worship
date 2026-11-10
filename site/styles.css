@@ -103,7 +103,7 @@ nav a:hover { color: #fff; }
 .btn.primary { background: var(--accent); color: #14301f; }
 .btn.ghost { border-color: rgba(255,255,255,0.35); color: #fff; background: rgba(0,0,0,0.2); }
 .btn.large { padding: 1rem 1.7rem; font-size: 1.05rem; }
-.features, .pro, .download, .product {
+.features, .pro, .download, .product, .getting-started {
   padding: 4.5rem 6vw;
   border-top: 1px solid var(--line);
   background: linear-gradient(180deg, #0d1a14, #0a1510);
@@ -196,3 +196,10 @@ footer span { color: var(--accent); font-family: var(--display); font-size: 1.15
   .hero { align-items: end; min-height: 92vh; }
   nav { display: none; }
 }
+
+.getting-started .flow { max-width: 52rem; }
+.getting-started .flow li { padding: 0.4rem 0; }
+details { max-width: 52rem; border-top: 1px solid var(--line); padding: 1rem 0; color: var(--muted); }
+summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .hero-media, .brand, .hero h1, .support, .cta { animation: none; } }

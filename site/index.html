@@ -16,6 +16,7 @@
     <nav>
       <a href="#product">Screenshots</a>
       <a href="#features">Features</a>
+      <a href="#getting-started">How to use</a>
       <a href="#propresenter">ProPresenter</a>
       <a href="#download">Download</a>
     </nav>
@@ -29,8 +30,8 @@
         <h1>Worship lyrics, in focus.</h1>
         <p class="support">Prepare songs and Scripture, lay out bilingual text, place background and foreground media, then send transparent lyrics to ProPresenter — or run Selah alone.</p>
         <div class="cta">
-          <a class="btn primary" href="https://github.com/juandozuna/selah-worship/releases/latest">Download for Mac</a>
-          <a class="btn ghost" href="https://github.com/juandozuna/selah-worship">View on GitHub</a>
+          <a class="btn primary" href="#download">Download for Mac</a>
+          <a class="btn ghost" href="#getting-started">Learn how to use Selah</a>
         </div>
       </div>
     </section>
@@ -71,8 +72,34 @@
         <li><strong>Background &amp; foreground media</strong> Images or video behind or in front of lyrics, with audio device selection.</li>
         <li><strong>Scripture ready</strong> Built-in WEB and Reina-Valera 1909, plus importable translations.</li>
         <li><strong>Local-first AI</strong> Organize lyric lines on this computer without rewriting the words.</li>
+        <li><strong>Show control</strong> Map MIDI buttons, receive OSC commands, and follow MTC or LTC timecode with timeline cues.</li>
+        <li><strong>Your fonts</strong> Import TTF or OTF fonts in Layout for your lyric designs.</li>
         <li><strong>Volunteer friendly</strong> A short PDF guide ships in the DMG for first-time operators.</li>
       </ul>
+    </section>
+
+    <section id="getting-started" class="getting-started">
+      <h2>Your first service, step by step</h2>
+      <p class="section-lede">Install Selah, prepare your content, then put a lyric block on air. You can present without AI or an external controller.</p>
+      <ol class="flow">
+        <li><strong>Install on your Mac.</strong> Download the DMG below, open it, and drag Selah into Applications. The volunteer guide PDF is included beside the app.</li>
+        <li><strong>Open Selah.</strong> This release is unsigned. If macOS blocks the first launch, try opening it once, then go to System Settings → Privacy &amp; Security → Open Anyway and confirm. Follow any restrictions set by your organization.</li>
+        <li><strong>Build your service.</strong> Choose <strong>Add content</strong> to select a saved song, paste lyrics, import OpenLyrics, or load Scripture. Put the songs in service order.</li>
+        <li><strong>Choose the look.</strong> In <strong>Layout</strong>, choose centered, lower-third, or bilingual text. Add background or foreground media, or use <strong>Import .ttf / .otf</strong> for a custom font. Apply the layout before presenting.</li>
+        <li><strong>Go live.</strong> In <strong>Present</strong>, select a song and click a lyric block. Use Previous/Next, arrow keys, or Space to navigate. Escape clears the lyrics.</li>
+        <li><strong>Connect your output.</strong> Configure your screen in <strong>Display</strong>, or start NDI/Syphon in <strong>Settings → Output</strong> and select the Selah feed in your receiver. Keep “Send media on NDI/Syphon” off for transparent lyrics.</li>
+        <li><strong>Save a portable copy.</strong> Use <strong>Service options → Export</strong>. When using imported fonts, copy the fonts/ folder alongside the exported service.</li>
+      </ol>
+      <details>
+        <summary>Set up MIDI, OSC, and timeline cues</summary>
+        <p>In <strong>Settings → MIDI</strong>, enable MIDI, choose an input, and use <strong>Learn</strong> beside a command to capture your controller button. In <strong>Settings → OSC</strong>, enable OSC and choose the UDP port (9000 by default). Send /selah/next, /selah/prev, or /selah/clear from your controller.</p>
+        <p>In <strong>Present → Timeline</strong>, put a block on air, position the playhead, and choose <strong>Tap set-cue · current block</strong>. Choose <strong>Play</strong> for the internal clock with external chase off. To follow external timecode, select MTC or LTC and the matching FPS in <strong>Settings → Timecode &amp; chase</strong>. LTC uses the default audio input’s first channel and may request microphone permission. With pause-on-manual enabled, manual navigation pauses chase; choose <strong>Re-sync</strong> to resume.</p>
+        <p>These controls require the desktop controller. Test your hardware, timecode source, and output receiver before a service.</p>
+      </details>
+      <details>
+        <summary>Use local AI and live translation</summary>
+        <p>In <strong>Settings</strong>, choose <strong>Set up local AI</strong> to download the local model (about 2.5 GB; internet needed for setup). In <strong>Present</strong>, enable <strong>Live AI translation</strong>, select a language, and present a song. Original lyrics stay visible while translation runs. Local AI works offline after setup; 16 GB RAM is recommended.</p>
+      </details>
     </section>
 
     <section id="propresenter" class="pro">
@@ -87,13 +114,18 @@
         <li>Add the Selah feed as an input in ProPresenter</li>
         <li>Keep “Send media on NDI/Syphon” off for alpha lyrics</li>
       </ol>
-      <a class="text-link" href="https://github.com/juandozuna/selah-worship/releases/latest">Get the volunteer guide PDF in the release →</a>
+      <a class="text-link" href="https://github.com/juandozuna/selah-worship/releases/download/v0.2.0/Selah-Volunteer-Guide.pdf">Read the volunteer guide PDF →</a>
     </section>
 
     <section id="download" class="download">
       <h2>Download Selah</h2>
-      <p class="section-lede">Unsigned Apple Silicon DMG for macOS 12+. Drag to Applications, open the guide, present.</p>
-      <a class="btn primary large" href="https://github.com/juandozuna/selah-worship/releases/latest">Latest release</a>
+      <p class="section-lede">Selah 0.2.0 · Apple Silicon (M1 or newer) · macOS 12 or later. This release is unsigned and not notarized.</p>
+      <div class="cta">
+        <a class="btn primary large" href="https://github.com/juandozuna/selah-worship/releases/download/v0.2.0/Selah_0.2.0_aarch64.dmg">Download Selah 0.2.0 for Mac</a>
+        <a class="btn ghost" href="https://github.com/juandozuna/selah-worship/releases/tag/v0.2.0">Release notes &amp; all files</a>
+        <a class="btn ghost" href="https://github.com/juandozuna/selah-worship/releases/download/v0.2.0/Selah-Volunteer-Guide.pdf">Volunteer guide PDF</a>
+      </div>
+      <p class="fine">The DMG includes the app and volunteer guide. Windows and Intel Mac installers are not included in this release.</p>
       <p class="fine">Requires the NDI runtime for network video and Syphon.framework for same-Mac Syphon. Signing and notarization come in a later release.</p>
     </section>
   </main>
