@@ -7,6 +7,7 @@ const frameKey=(layout:Layout,block:Block|null,testPattern:boolean)=>JSON.string
 export function Canvas({layout,block,testPattern=false,editable=false,selected,onSelect,onTransform,onDuplicate,onGesture,guide,motion,animate=false}:{layout:Layout;block:Block|null;testPattern?:boolean;editable?:boolean;selected?:string;onSelect?:(id:string)=>void;onTransform?:(id:string,rect:Rect)=>void;onDuplicate?:(id:string)=>string|undefined;onGesture?:()=>void;guide?:Guide;motion?:Motion|null;animate?:boolean}) {
   const canvas=useRef<HTMLCanvasElement>(null);
   const animating=useRef(false),lastKey=useRef(''),[settled,setSettled]=useState(0);
+  useEffect(()=>{const redraw=()=>setSettled(n=>n+1);window.addEventListener('selah:fonts-loaded',redraw);return()=>window.removeEventListener('selah:fonts-loaded',redraw);},[]);
   useEffect(()=>{
     const c=canvas.current;if(!c)return;
     const key=frameKey(layout,block,testPattern),changed=key!==lastKey.current,first=lastKey.current==='';lastKey.current=key;
@@ -32,7 +33,7 @@ export function Canvas({layout,block,testPattern=false,editable=false,selected,o
     };
     raf=requestAnimationFrame(tick);
     return()=>{alive=false;cancelAnimationFrame(raf);animating.current=false;};
-  },[layout,block,testPattern,motion,animate,editable]);
+  },[layout,block,testPattern,motion,animate,editable,settled]);
   useEffect(()=>{
     if(!desktop()||animating.current) return;
     let cancelled=false;
