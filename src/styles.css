@@ -65,3 +65,9 @@
 .display-root .display-stage .canvas-surface{width:100%;max-height:none}
 .layout-canvas-wrap .media-stack{width:100%}
 .layout-canvas-wrap .canvas-surface{width:100%}
+.timeline-editor { margin: 16px 0; padding: 16px; border: 1px solid var(--border, #e5e5e5); border-radius: 12px; }
+.timeline-transport { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+.timeline-transport label { min-width: 70px; flex: 1; }
+.timeline-editor input[type=range] { width: 100%; }
+.timeline-cues { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.timeline-cues button { border: 0; background: transparent; cursor: pointer; }
