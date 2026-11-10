@@ -87,6 +87,39 @@ async fn set_live(state: State<'_, AppState>, live: LiveSnapshot) -> Result<(), 
     })
     .await
 }
+/// Preparation only: callers must serialize this and publish the returned intent
+/// through the existing present/set_live queue. No adapter or clock runs here.
+#[tauri::command]
+async fn apply_presentation_command(
+    project: Project,
+    current: LiveSnapshot,
+    status: selah_application::presenter::ControlStatus,
+    command: PresentationCommand,
+    origin: CommandOrigin,
+    selected_song_id: Option<String>,
+    motion_on: bool,
+) -> Result<selah_application::presenter::CommandIntent, String> {
+    blocking(move || {
+        selah_application::presenter::apply_presentation_command(
+            &project,
+            &current,
+            &status,
+            &command,
+            origin,
+            selected_song_id.as_deref(),
+            motion_on,
+        )
+    })
+    .await
+}
+
+/// Reports capabilities, not a running chase state: Wave 1 has no listeners.
+#[tauri::command]
+fn control_status() -> serde_json::Value {
+    serde_json::json!({"commandApiVersion": 1, "midiListening": false, "oscListening": false,
+        "mtcAvailable": false, "ltcAvailable": false, "timelineClockRunning": false})
+}
+
 #[tauri::command]
 async fn render_preview(state: State<'_, AppState>, live: LiveSnapshot) -> Result<String, String> {
     let renderer = state.preview_renderer.clone();
@@ -750,6 +783,8 @@ fn main() {
             load_project,
             save_project,
             set_live,
+            apply_presentation_command,
+            control_status,
             render_preview,
             toggle_output,
             output_status,

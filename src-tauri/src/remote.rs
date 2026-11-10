@@ -44,6 +44,24 @@ async fn dispatch(app: &tauri::AppHandle, cmd: &str, a: Value) -> Result<Value, 
     match cmd {
         "load_project" => json(load_project(app.state(), arg(&a, "seed")?).await?),
         "save_project" => json(save_project(app.state(), arg(&a, "project")?).await?),
+        "control_status" => Ok(control_status()),
+        "apply_presentation_command" => json(
+            apply_presentation_command(
+                arg(&a, "project")?,
+                arg(&a, "current")?,
+                arg(&a, "status")?,
+                arg(&a, "command")?,
+                arg(&a, "origin")?,
+                a.get("selectedSongId")
+                    .cloned()
+                    .map(serde_json::from_value)
+                    .transpose()
+                    .map_err(|e| e.to_string())?
+                    .flatten(),
+                arg(&a, "motionOn")?,
+            )
+            .await?,
+        ),
         "set_live" => json(set_live(app.state(), arg(&a, "live")?).await?),
         "render_preview" => json(render_preview(app.state(), arg(&a, "live")?).await?),
         "toggle_output" => json(
