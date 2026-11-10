@@ -3,11 +3,47 @@ pub mod media;
 pub mod transition;
 pub use composite::{blit_layer, compose_stack, FitMode, LayerBlit, RgbaImage};
 use selah_domain::{LiveSnapshot, TextAnimSpec, TextRegion};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, OnceLock};
 use transition::{ease, Raster};
 
+type FontDb = resvg::usvg::fontdb::Database;
+fn fonts() -> &'static Mutex<Arc<FontDb>> {
+    static FONTS: OnceLock<Mutex<Arc<FontDb>>> = OnceLock::new();
+    FONTS.get_or_init(|| {
+        let mut db = FontDb::new();
+        db.load_system_fonts();
+        Mutex::new(Arc::new(db))
+    })
+}
+/// Shared by existing output and preview renderers, including imports made after startup.
+pub fn load_font_file(path: &std::path::Path) -> Result<(), String> {
+    static LOADED: OnceLock<Mutex<std::collections::HashSet<std::path::PathBuf>>> = OnceLock::new();
+    let mut loaded = LOADED
+        .get_or_init(Default::default)
+        .lock()
+        .map_err(|_| "Font registry unavailable")?;
+    if loaded.contains(path) {
+        return Ok(());
+    }
+    Arc::make_mut(&mut *fonts().lock().map_err(|_| "Font database unavailable")?)
+        .load_font_file(path)
+        .map_err(|e| e.to_string())?;
+    loaded.insert(path.to_owned());
+    Ok(())
+}
+pub fn font_family(bytes: &[u8]) -> Result<String, String> {
+    let mut db = FontDb::new();
+    db.load_font_data(bytes.to_vec());
+    let family = db
+        .faces()
+        .next()
+        .and_then(|face| face.families.first())
+        .map(|(name, _)| name.clone())
+        .ok_or_else(|| "Invalid or unsupported font".into());
+    family
+}
+
 pub struct Renderer {
-    fontdb: Arc<resvg::usvg::fontdb::Database>,
     device: wgpu::Device,
     queue: wgpu::Queue,
 }
@@ -27,8 +63,7 @@ fn escape(s: &str) -> String {
 }
 impl Renderer {
     pub fn new() -> Result<Self, String> {
-        let mut fontdb = resvg::usvg::fontdb::Database::new();
-        fontdb.load_system_fonts();
+        let _ = fonts();
         let instance = wgpu::Instance::default();
         let adapter =
             pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
@@ -43,11 +78,7 @@ impl Renderer {
             None,
         ))
         .map_err(|e| e.to_string())?;
-        Ok(Self {
-            fontdb: Arc::new(fontdb),
-            device,
-            queue,
-        })
+        Ok(Self { device, queue })
     }
     #[allow(clippy::too_many_arguments)]
     fn animated_lines(
@@ -148,14 +179,15 @@ impl Renderer {
     fn text_width(&self, text: &str, r: &selah_domain::TextRegion) -> f32 {
         use resvg::usvg::fontdb::{Family, Query, Weight};
         let families = [Family::Name(&r.font_family), Family::SansSerif];
-        let Some(id) = self.fontdb.query(&Query {
+        let fontdb = fonts().lock().unwrap().clone();
+        let Some(id) = fontdb.query(&Query {
             families: &families,
             weight: Weight(600),
             ..Default::default()
         }) else {
             return text.chars().count() as f32 * r.font_size * 0.55;
         };
-        self.fontdb
+        fontdb
             .with_face_data(id, |data, index| {
                 let Some(face) = rustybuzz::Face::from_slice(data, index) else {
                     return 0.0;
@@ -265,7 +297,7 @@ impl Renderer {
         }
         svg.push_str("</svg>");
         let options = resvg::usvg::Options {
-            fontdb: self.fontdb.clone(),
+            fontdb: fonts().lock().unwrap().clone(),
             ..Default::default()
         };
         let tree = resvg::usvg::Tree::from_str(&svg, &options).map_err(|e| e.to_string())?;
