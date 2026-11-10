@@ -61,3 +61,20 @@ test('failed autosave leaves the previous service intact',async()=>{
   await assert.rejects(save(project),/quota/);
   assert.equal(values.get('selah.project.v1'),original);
 });
+
+test('native project load and adapter-setting saves use the backend lifecycle hooks',async()=>{
+  const calls:{command:string;args:Record<string,unknown>|undefined}[]=[];
+  const project=structuredClone(seed);
+  window.__TAURI_INTERNALS__={invoke:async<T>(command:string,args?:Record<string,unknown>)=>{
+    calls.push({command,args});return (command==='load_project'?project:undefined) as T;
+  }};
+  try{
+    assert.equal(await load(),project);
+    project.settings.midi={enabled:true,deviceId:'Stage keyboard',bindings:[]};
+    project.settings.osc={enabled:true,port:9100};
+    project.settings.timecode={fps:25,dropFrame:false,armedSource:'ltc',pauseOnManual:true};
+    await save(project);
+    assert.deepEqual(calls.map(c=>c.command),['load_project','save_project']);
+    assert.deepEqual(calls[1].args,{project});
+  }finally{delete window.__TAURI_INTERNALS__;}
+});
