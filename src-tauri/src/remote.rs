@@ -8,8 +8,9 @@ use tiny_http::{Header, Method, Response, Server};
 pub const PORT: u16 = 47832;
 const MAX_BODY: u64 = 100 * 1024 * 1024;
 /// Commands that touch credentials, local runtimes or large downloads stay desktop-only.
-const DESKTOP_ONLY: [&str; 4] = [
+const DESKTOP_ONLY: [&str; 5] = [
     "save_credential",
+    "import_font",
     "download_model",
     "start_local_ai",
     "setup_local_ai",
@@ -44,7 +45,22 @@ async fn dispatch(app: &tauri::AppHandle, cmd: &str, a: Value) -> Result<Value, 
     match cmd {
         "load_project" => json(load_project(app.state(), arg(&a, "seed")?).await?),
         "save_project" => json(save_project(app.state(), arg(&a, "project")?).await?),
-        "control_status" => Ok(control_status()),
+        "control_status" => Ok(control_status(app.state())),
+        "control_start" => json(control_start(app.state(), arg(&a, "project")?).await?),
+        "control_stop" => json(control_stop(app.state()).await?),
+        "control_sync" => json(control_sync(app.state(), arg(&a, "status")?).await?),
+        "midi_learn" => {
+            midi_learn(
+                app.state(),
+                a.get("bindingId")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
+            )
+            .await?;
+            Ok(Value::Null)
+        }
+        "list_ltc_audio_devices" => json(list_ltc_audio_devices().await?),
+        "list_midi_devices" => json(list_midi_devices().await?),
         "apply_presentation_command" => json(
             apply_presentation_command(
                 arg(&a, "project")?,
