@@ -1,3 +1,4 @@
+import { validateControlContracts } from './controlModel';
 import type { Block, Layout, Live, MediaAsset, MediaLayer, Motion, MotionOverride, Project, Song } from './types';
 export function splitLyrics(text: string, size = 2): Block[] {
   const blocks: Block[] = []; let section = 'Verse 1', lines: string[] = [];
@@ -61,6 +62,7 @@ export function validateProject(p: Project): void {
     const blockIds=new Set<string>();
     for(const block of song.blocks) {if(!block||typeof block.id!=='string'||!block.id||blockIds.has(block.id)||typeof block.section!=='string'||typeof block.primary!=='string'||block.primary.length>100000||!(block.secondary===null||typeof block.secondary==='string')||!(block.reference===null||typeof block.reference==='string')) throw new Error('Invalid content block.');validateMotion(block.motion);blockIds.add(block.id);}
   }
+  validateControlContracts(p);
   if(p.service.some(id=>typeof id!=='string'||!ids.has(id))||new Set(p.service).size!==p.service.length) throw new Error('Service contains missing or duplicate content.');
   if(!['en','es'].includes(p.settings.language)||['feedName','aiProvider','aiModel','aiEndpoint','localServerPath','localModelPath'].some(key=>typeof p.settings[key as keyof typeof p.settings]!=='string')) throw new Error('Invalid interface settings.');
 }

@@ -1,7 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod display;
+mod midi;
+mod osc;
 mod output;
 mod remote;
+mod timecode;
 use base64::Engine as _;
 use selah_application::{BibleRepository, CredentialStore};
 use selah_domain::*;
@@ -18,6 +21,7 @@ use std::{
 use tauri::{Manager, State};
 
 struct AppState {
+    controls: Arc<timecode::Runtime>,
     store: Arc<Mutex<SqliteStore>>,
     output: Arc<output::Engine>,
     worker: Arc<Mutex<Option<LocalWorker>>>,
@@ -39,6 +43,7 @@ async fn load_project(state: State<'_, AppState>, mut seed: Project) -> Result<P
     let store = state.store.clone();
     let output = state.output.clone();
     let display = state.display.clone();
+    let controls = state.controls.clone();
     let media_dir = state.data_dir.join("media");
     seed.settings.local_server_path = state.runtime_path.to_string_lossy().into_owned();
     let model = state.data_dir.join("qwen3-4b-q4.gguf");
@@ -58,7 +63,9 @@ async fn load_project(state: State<'_, AppState>, mut seed: Project) -> Result<P
             p.settings.local_model_path = model.to_string_lossy().into_owned();
         }
         std::fs::create_dir_all(&media_dir).map_err(|e| e.to_string())?;
-        let _ = output.set_media_root(media_dir);
+        let _ = output.set_media_root(media_dir.clone());
+        register_project_fonts(&p, &media_dir)?;
+        controls.configure(p.clone())?;
         let cleared = selah_application::clear_with_media(&p);
         display.set_live(cleared.clone());
         output.live(cleared)?;
@@ -69,11 +76,15 @@ async fn load_project(state: State<'_, AppState>, mut seed: Project) -> Result<P
 #[tauri::command]
 async fn save_project(state: State<'_, AppState>, project: Project) -> Result<(), String> {
     let store = state.store.clone();
+    let controls = state.controls.clone();
+    let media_dir = state.data_dir.join("media");
     blocking(move || {
         selah_application::save_project(
             &*store.lock().map_err(|_| "Database unavailable")?,
             &project,
-        )
+        )?;
+        register_project_fonts(&project, &media_dir)?;
+        controls.update_project(project)
     })
     .await
 }
@@ -87,6 +98,143 @@ async fn set_live(state: State<'_, AppState>, live: LiveSnapshot) -> Result<(), 
     })
     .await
 }
+/// Preparation only: callers must serialize this and publish the returned intent
+/// through the existing present/set_live queue. No adapter or clock runs here.
+#[tauri::command]
+async fn apply_presentation_command(
+    project: Project,
+    current: LiveSnapshot,
+    status: selah_application::presenter::ControlStatus,
+    command: PresentationCommand,
+    origin: CommandOrigin,
+    selected_song_id: Option<String>,
+    motion_on: bool,
+) -> Result<selah_application::presenter::CommandIntent, String> {
+    blocking(move || {
+        selah_application::presenter::apply_presentation_command(
+            &project,
+            &current,
+            &status,
+            &command,
+            origin,
+            selected_song_id.as_deref(),
+            motion_on,
+        )
+    })
+    .await
+}
+
+/// Live adapter state; startup/device errors are exposed in `errors`.
+#[tauri::command]
+fn control_status(state: State<'_, AppState>) -> serde_json::Value {
+    state.controls.status()
+}
+#[tauri::command]
+async fn control_start(state: State<'_, AppState>, project: Project) -> Result<(), String> {
+    let controls = state.controls.clone();
+    blocking(move || controls.configure(project)).await
+}
+#[tauri::command]
+async fn control_stop(state: State<'_, AppState>) -> Result<(), String> {
+    let controls = state.controls.clone();
+    blocking(move || {
+        controls.stop();
+        Ok(())
+    })
+    .await
+}
+#[tauri::command]
+async fn control_sync(
+    state: State<'_, AppState>,
+    status: selah_application::presenter::ControlStatus,
+) -> Result<(), String> {
+    let controls = state.controls.clone();
+    blocking(move || controls.sync(status)).await
+}
+#[tauri::command]
+async fn midi_learn(state: State<'_, AppState>, binding_id: Option<String>) -> Result<(), String> {
+    let controls = state.controls.clone();
+    blocking(move || controls.learn(binding_id)).await
+}
+#[tauri::command]
+async fn list_midi_devices() -> Result<Vec<midi::Device>, String> {
+    blocking(midi::devices).await
+}
+
+#[tauri::command]
+async fn list_ltc_audio_devices() -> Result<Vec<AudioDeviceInfo>, String> {
+    blocking(|| {
+        use cpal::traits::{DeviceTrait, HostTrait};
+        cpal::default_host()
+            .input_devices()
+            .map_err(|e| e.to_string())?
+            .map(|device| {
+                device
+                    .name()
+                    .map(|label| AudioDeviceInfo {
+                        id: label.clone(),
+                        label,
+                    })
+                    .map_err(|e| e.to_string())
+            })
+            .collect()
+    })
+    .await
+}
+
+fn register_project_fonts(project: &Project, media_dir: &std::path::Path) -> Result<(), String> {
+    for asset in &project.fonts {
+        asset.validate()?;
+        let path = media_dir.join(&asset.relative_path);
+        // Portable projects may reference fonts that haven't been imported on this machine.
+        if path.is_file() {
+            selah_renderer::load_font_file(&path)?;
+        }
+    }
+    Ok(())
+}
+#[tauri::command]
+async fn import_font(
+    state: State<'_, AppState>,
+    path: Option<String>,
+) -> Result<FontAsset, String> {
+    let root = state.data_dir.join("media").join("fonts");
+    blocking(move || {
+        let source = match path {
+            Some(path) => PathBuf::from(path),
+            None => rfd::FileDialog::new()
+                .add_filter("Fonts", &["ttf", "otf"])
+                .pick_file()
+                .ok_or("Font import cancelled")?,
+        };
+        let ext = source
+            .extension()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+        if !["ttf", "otf"].contains(&ext.as_str()) {
+            return Err("Choose a .ttf or .otf font".into());
+        }
+        if std::fs::metadata(&source).map_err(|e| e.to_string())?.len() > 32 * 1024 * 1024 {
+            return Err("Font exceeds 32 MiB".into());
+        }
+        let bytes = std::fs::read(&source).map_err(|e| e.to_string())?;
+        let family = selah_renderer::font_family(&bytes)?;
+        let id = format!("font-{:x}", Sha256::digest(&bytes));
+        let name = format!("{id}.{ext}");
+        std::fs::create_dir_all(&root).map_err(|e| e.to_string())?;
+        let dest = root.join(&name);
+        std::fs::write(&dest, bytes).map_err(|e| e.to_string())?;
+        selah_renderer::load_font_file(&dest)?;
+        Ok(FontAsset {
+            id,
+            family,
+            relative_path: format!("fonts/{name}"),
+        })
+    })
+    .await
+}
+
 #[tauri::command]
 async fn render_preview(state: State<'_, AppState>, live: LiveSnapshot) -> Result<String, String> {
     let renderer = state.preview_renderer.clone();
@@ -583,9 +731,7 @@ fn list_audio_devices() -> Result<Vec<AudioDeviceInfo>, String> {
         .output_devices()
         .map_err(|e| format!("Could not list audio outputs: {e}"))?;
     for device in devices {
-        let label = device
-            .name()
-            .unwrap_or_else(|_| "Audio output".into());
+        let label = device.name().unwrap_or_else(|_| "Audio output".into());
         out.push(AudioDeviceInfo {
             id: label.clone(),
             label,
@@ -619,10 +765,7 @@ async fn import_media_file(state: State<'_, AppState>) -> Result<MediaAsset, Str
             .and_then(|e| e.to_str())
             .unwrap_or("bin")
             .to_lowercase();
-        let kind = if matches!(
-            ext.as_str(),
-            "mp4" | "mov" | "webm" | "m4v" | "avi" | "mkv"
-        ) {
+        let kind = if matches!(ext.as_str(), "mp4" | "mov" | "webm" | "m4v" | "avi" | "mkv") {
             "video"
         } else {
             "image"
@@ -734,7 +877,9 @@ fn main() {
             std::fs::create_dir_all(&media_dir)?;
             let engine = output::Engine::start();
             let _ = engine.set_media_root(media_dir);
+            let controls = Arc::new(timecode::Runtime::new(app.handle().clone()));
             app.manage(AppState {
+                controls,
                 store: Arc::new(Mutex::new(store)),
                 output: Arc::new(engine),
                 worker: Arc::new(Mutex::new(None)),
@@ -750,6 +895,15 @@ fn main() {
             load_project,
             save_project,
             set_live,
+            apply_presentation_command,
+            control_status,
+            control_start,
+            control_stop,
+            control_sync,
+            midi_learn,
+            list_midi_devices,
+            list_ltc_audio_devices,
+            import_font,
             render_preview,
             toggle_output,
             output_status,
@@ -788,10 +942,14 @@ fn main() {
                 event: tauri::WindowEvent::CloseRequested { .. },
                 ..
             } if label == "main" => {
+                app.state::<AppState>().controls.stop();
                 process::shutdown();
                 app.exit(0);
             }
-            tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit => process::shutdown(),
+            tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit => {
+                app.state::<AppState>().controls.stop();
+                process::shutdown();
+            }
             _ => {}
         });
 }

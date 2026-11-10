@@ -1,0 +1,7 @@
+{
+  "version":1,"name":"Legacy service",
+  "library":[{"id":"song","title":"Song","artist":"","language":"en","kind":"song","source":{"name":"Test","url":null,"license":"Test"},"blocks":[{"id":"a","section":"Verse","primary":"One","secondary":null,"reference":null},{"id":"b","section":"Verse","primary":"Two","secondary":null,"reference":null}]}],
+  "service":["song"],
+  "layout":{"width":1920,"height":1080,"regions":[{"id":"lyrics","name":"Lyrics","x":0,"y":0,"width":1920,"height":1080,"fontSize":72,"fontFamily":"Arial","color":"#ffffff","align":"center","binding":"primary","outline":0,"shadow":false}]},
+  "settings":{"language":"en","feedName":"Test","aiProvider":"local","aiModel":"","aiEndpoint":"","localServerPath":"","localModelPath":""}
+}

@@ -1,3 +1,5 @@
+mod control;
+pub use control::*;
 use serde::{Deserialize, Serialize};
 
 pub const TRANSITION_KINDS: [&str; 9] = [
@@ -164,6 +166,8 @@ pub struct Source {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Song {
+    #[serde(default)]
+    pub cues: Vec<TimelineCue>,
     pub id: String,
     pub title: String,
     pub artist: String,
@@ -380,6 +384,12 @@ impl CanvasLayout {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
+    #[serde(default)]
+    pub midi: MidiMap,
+    #[serde(default)]
+    pub osc: OscSettings,
+    #[serde(default)]
+    pub timecode: TimecodeSettings,
     pub language: String,
     pub feed_name: String,
     pub ai_provider: String,
@@ -413,6 +423,8 @@ impl DisplayOutput {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Project {
+    #[serde(default)]
+    pub fonts: Vec<FontAsset>,
     pub version: u32,
     pub name: String,
     pub library: Vec<Song>,
@@ -438,6 +450,34 @@ impl Project {
         }
         self.layout.validate()?;
         self.motion.validate()?;
+        self.settings.midi.validate(self)?;
+        self.settings.osc.validate()?;
+        self.settings.timecode.validate()?;
+        let mut font_ids = std::collections::HashSet::new();
+        if self.fonts.len() > 256 {
+            return Err("Too many font assets".into());
+        }
+        for font in &self.fonts {
+            font.validate()?;
+            if !font_ids.insert(&font.id) {
+                return Err("Duplicate font asset ID".into());
+            }
+        }
+        let mut cue_ids = std::collections::HashSet::new();
+        for song in &self.library {
+            if song.cues.len() > 10_000 {
+                return Err("Too many timeline cues".into());
+            }
+            for cue in &song.cues {
+                if cue.id.is_empty()
+                    || !cue_ids.insert(&cue.id)
+                    || cue.time_frames > MAX_TIME_FRAMES
+                {
+                    return Err("Invalid or duplicate timeline cue".into());
+                }
+                cue.command.validate(self)?;
+            }
+        }
         if let Some(display) = &self.display {
             display.validate()?;
         }

@@ -1,12 +1,52 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Radio, Cpu, KeyRound, Download, Check, LoaderCircle, ArrowUpRight, HardDrive, Globe, Monitor, Wand2 } from 'lucide-react';
-import type { Project, Settings, OutputStatus, DisplayOutput, DisplayOverview, Motion } from './types';
+import type { Project, Settings, OutputStatus, DisplayOutput, DisplayOverview, Motion, ControlStatus, PresentationCommand, ChaseSource } from './types';
 import { scaleLayout, CUT_MOTION } from './model';
 import { MotionEditor } from './MotionPicker';
 import { desktop, invoke } from './bridge';
 import { en, es } from './i18n';
+import { DEFAULT_MIDI_MAP, DEFAULT_OSC_SETTINGS, DEFAULT_TIMECODE_SETTINGS } from './controlModel';
+import { listen } from '@tauri-apps/api/event';
+import { applyMidiLearn, type MidiLearnEvent } from './controlAdapters';
+import type { ControlCapabilities } from './types';
 import modelManifest from '../assets/model.json';
-export default function SettingsView({project,change,changeMotion,changeDisplay,changeStreamComposite,status,refresh}:{project:Project;change:(settings:Settings)=>void;changeMotion:(motion:Motion)=>void;changeDisplay:(display:DisplayOutput)=>void;changeStreamComposite:(streamComposite:boolean)=>void;status:OutputStatus[];refresh:()=>void}) {
+export default function SettingsView({project,change,changeMotion,changeDisplay,changeStreamComposite,status,refresh,control,enqueue}:{control:ControlStatus;enqueue:(command:PresentationCommand)=>void;project:Project;change:(settings:Settings)=>void;changeMotion:(motion:Motion)=>void;changeDisplay:(display:DisplayOutput)=>void;changeStreamComposite:(streamComposite:boolean)=>void;status:OutputStatus[];refresh:()=>void}) {
+  const [learning,setLearning]=useState<string|null>(null);
+  const learningRef=useRef<string|null>(null);
+  const [learnReady,setLearnReady]=useState(false);
+  const [midiDevices,setMidiDevices]=useState<{id:string;name:string}[]>([]);
+  const [adapterStatus,setAdapterStatus]=useState<(ControlCapabilities & {errors:string[]})|null>(null);
+  const [adapterError,setAdapterError]=useState('');
+  const latest=useRef({settings:project.settings,change});latest.current={settings:project.settings,change};
+  useEffect(()=>{
+    if(!desktop())return;
+    let cancelled=false;
+    const refreshAdapters=()=>{
+      invoke<ControlCapabilities & {errors:string[]}>('control_status').then(value=>{if(!cancelled){setAdapterStatus(value);setAdapterError('');}}).catch(e=>{if(!cancelled)setAdapterError(String(e));});
+      invoke<{id:string;name:string}[]>('list_midi_devices').then(value=>{if(!cancelled)setMidiDevices(value);}).catch(e=>{if(!cancelled)setAdapterError(String(e));});
+    };
+    refreshAdapters();const timer=setInterval(refreshAdapters,3000);
+    return()=>{cancelled=true;clearInterval(timer);};
+  },[]);
+  useEffect(()=>{
+    if(!window.__TAURI_INTERNALS__)return;
+    let cancelled=false,dispose:(()=>void)|undefined;
+    listen<MidiLearnEvent>('control://midi-learn',({payload})=>{
+      if(cancelled||payload.bindingId!==learningRef.current)return;
+      try{
+        const {settings,change}=latest.current;
+        const midi=applyMidiLearn(settings.midi??DEFAULT_MIDI_MAP,payload,learningRef.current);
+        change({...settings,midi});
+      }catch(e){setError(String(e));}
+      finally{learningRef.current=null;setLearning(null);}
+    }).then(fn=>{if(cancelled)fn();else{dispose=fn;setLearnReady(true);}}).catch(e=>setError(String(e)));
+    return()=>{cancelled=true;dispose?.();if(learningRef.current){learningRef.current=null;void invoke('midi_learn',{bindingId:null}).catch(()=>{});}};
+  },[]);
+  const learn=async(bindingId:string|null)=>{
+    learningRef.current=bindingId;setLearning(bindingId);
+    try{await invoke('midi_learn',{bindingId});}
+    catch(e){if(learningRef.current===bindingId){learningRef.current=null;setLearning(null);}setError(String(e));}
+  };
   const s=project.settings,t=s.language==='es'?es:en;
   const [message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(''),[key,setKey]=useState(''),[searchKey,setSearchKey]=useState(''),[downloadUrl,setDownloadUrl]=useState(modelManifest.url),[checksum,setChecksum]=useState(modelManifest.sha256);
   const [progress,setProgress]=useState(0),[urls,setUrls]=useState<string[]>([]);
@@ -21,6 +61,9 @@ export default function SettingsView({project,change,changeMotion,changeDisplay,
   const job=async(name:string,fn:()=>Promise<void>)=>{setError('');setMessage('');setBusy(name);try{await fn();}catch(e){setError(String(e));}finally{setBusy('');}};
   const patch=(p:Partial<Settings>)=>change({...s,...p});
   return <main className="settings-workspace"><div className="workspace-heading"><div><p className="eyebrow">MAKE IT YOURS</p><h1>{t.settings}</h1><p className="muted">Set up once. Everything stays on this computer.</p></div><span className="badge"><HardDrive size={13}/>Local first</span></div><div className="settings-grid">
+    <section className="settings-card"><div className="card-heading"><Radio size={21}/><div><h2>MIDI</h2><p>Map MIDI inputs to presentation commands.</p></div></div><label className="check-label"><input type="checkbox" checked={(s.midi??DEFAULT_MIDI_MAP).enabled} onChange={e=>patch({midi:{...(s.midi??DEFAULT_MIDI_MAP),enabled:e.target.checked}})}/>Enable MIDI</label><label>Device<select disabled={!desktop()} value={(s.midi??DEFAULT_MIDI_MAP).deviceId??''} onChange={e=>patch({midi:{...(s.midi??DEFAULT_MIDI_MAP),deviceId:e.target.value||null}})}><option value="">First available input</option>{(s.midi?.deviceId&&!midiDevices.some(d=>d.id===s.midi?.deviceId))&&<option value={s.midi.deviceId}>{s.midi.deviceId} (unavailable)</option>}{midiDevices.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label><p className="hint">{adapterStatus?.midiListening?'MIDI listening':'MIDI not listening'}{!window.__TAURI_INTERNALS__&&' · Learn requires the desktop controller.'}</p>{learning&&<button className="button small" onClick={()=>void learn(null)}>Cancel learn</button>}{(s.midi??DEFAULT_MIDI_MAP).bindings.map((b,i)=><div className="timeline-transport" key={b.id}><span>{b.command.type} · {b.message==='note'?'Note':'CC'}</span><label>Channel<input type="number" min="1" max="16" value={b.channel} onChange={e=>{const m=s.midi??DEFAULT_MIDI_MAP;patch({midi:{...m,bindings:m.bindings.map((x,n)=>n===i?{...x,channel:Number(e.target.value)}:x)}});}}/></label><label>Number<input type="number" min="0" max="127" value={b.number} onChange={e=>{const m=s.midi??DEFAULT_MIDI_MAP;patch({midi:{...m,bindings:m.bindings.map((x,n)=>n===i?{...x,number:Number(e.target.value)}:x)}});}}/></label><button className="button small" disabled={!learnReady} onClick={()=>void learn(learning===b.id?null:b.id)}>{learning===b.id?'Learning this row…':'Learn'}</button></div>)}</section>
+    <section className="settings-card"><div className="card-heading"><Globe size={21}/><div><h2>OSC</h2></div></div><label className="check-label"><input type="checkbox" checked={(s.osc??DEFAULT_OSC_SETTINGS).enabled} onChange={e=>patch({osc:{...(s.osc??DEFAULT_OSC_SETTINGS),enabled:e.target.checked}})}/>Enable OSC</label><label>UDP port<input type="number" min="1" max="65535" value={(s.osc??DEFAULT_OSC_SETTINGS).port} onChange={e=>patch({osc:{...(s.osc??DEFAULT_OSC_SETTINGS),port:Number(e.target.value)}})}/></label><p className="hint">{adapterStatus?.oscListening?'OSC listening':'OSC not listening'}</p><p className="hint">/selah/next · /selah/prev · /selah/clear · /selah/go/&#123;songId&#125;/&#123;block&#125; · /selah/chase/arm</p></section>
+    <section className="settings-card"><div className="card-heading"><Radio size={21}/><div><h2>Timecode &amp; chase</h2></div></div><div className="target-tabs">{(['none','mtc','ltc'] as const).map(source=><button key={source} className={control.armedSource===source?'active':''} onClick={()=>{patch({timecode:{...(s.timecode??DEFAULT_TIMECODE_SETTINGS),armedSource:source}});enqueue({type:'chaseArm',source:source as ChaseSource});}}>{source==='none'?'Off':source.toUpperCase()}</button>)}</div><p className="hint">MTC {adapterStatus?.mtcAvailable?'available':'unavailable'} · LTC {adapterStatus?.ltcAvailable?'available':'unavailable'}{adapterStatus?.timelineClockRunning?' · Clock running':''}</p>{(adapterError||adapterStatus?.errors.length)?<p className="hint" role="status">{[adapterError,...(adapterStatus?.errors??[])].filter(Boolean).join(' · ')}</p>:null}<label>FPS<select value={(s.timecode??DEFAULT_TIMECODE_SETTINGS).fps} onChange={e=>{const fps=Number(e.target.value) as 24|25|29.97|30;patch({timecode:{...(s.timecode??DEFAULT_TIMECODE_SETTINGS),fps,dropFrame:fps===29.97&&(s.timecode??DEFAULT_TIMECODE_SETTINGS).dropFrame}});}}>{[24,25,29.97,30].map(f=><option key={f}>{f}</option>)}</select></label><label className="check-label"><input type="checkbox" checked={(s.timecode??DEFAULT_TIMECODE_SETTINGS).pauseOnManual} onChange={e=>patch({timecode:{...(s.timecode??DEFAULT_TIMECODE_SETTINGS),pauseOnManual:e.target.checked}})}/>Pause chase on manual control</label><button className="button small" disabled={control.armedSource==='none'} onClick={()=>enqueue({type:'chaseResync'})}>Re-sync</button></section>
     <section className="settings-card"><div className="card-heading"><Radio size={21}/><div><h2>{t.output}</h2><p>A transparent lyric feed for your production software — or a full standalone composite.</p></div></div><label>{t.feed}<input value={s.feedName} onChange={e=>patch({feedName:e.target.value})}/></label><label className="check-label"><input type="checkbox" checked={Boolean(project.streamComposite)} onChange={e=>changeStreamComposite(e.target.checked)}/>Send media on NDI / Syphon</label><p className="hint">Off (default): transparent lyrics for ProPresenter and other switchers. On: bake background and foreground media into the published frames for a standalone look.</p><div className="protocol-list">{['NDI','Syphon'].map(protocol=>{const info=status.find(x=>x.protocol===protocol);return <div key={protocol}><div><strong>{protocol}</strong><small>{protocol==='NDI'?'Over your local network · Mac + Windows':'Same computer · macOS'}</small>{info?.error&&<small className="error">{info.error}</small>}</div><button className={`button small ${info?.sending?'primary':''}`} disabled={!desktop()||Boolean(busy)} onClick={()=>job(protocol,async()=>{await invoke('toggle_output',{protocol,enabled:!info?.sending,feedName:s.feedName});refresh();})}>{info?.sending?'Stop':'Start'}</button></div>;})}</div><p className="hint">NDI requires its runtime. Syphon requires Syphon.framework. The app reports missing runtimes before starting.</p></section>
     <section className="settings-card wide-card"><div className="card-heading"><Wand2 size={21}/><div><h2>Motion</h2><p>Default transition between blocks and how text arrives. Override per song or block in Present.</p></div></div><MotionEditor value={project.motion??CUT_MOTION} onChange={changeMotion} layout={project.layout} lang={s.language}/></section>
     {desktop()&&<section className="settings-card"><div className="card-heading"><Monitor size={21}/><div><h2>Display output</h2><p>Project lyrics full screen on a connected display, with its own layout.</p></div></div>{screens.displays.length===0?<p className="hint">No displays were detected.</p>:<><label>Display<select value={draft().monitor} onChange={e=>pushDisplay({...draft(),monitor:Number(e.target.value)})}>{screens.displays.map(d=><option key={d.index} value={d.index}>{d.name} · {d.width} × {d.height}{d.primary?' · main':''}</option>)}</select></label><label>Background color<input type="color" value={draft().background} onChange={e=>pushDisplay({...draft(),background:e.target.value})}/></label><p className="hint">Display layout: {draft().layout.width} × {draft().layout.height}. Edit it in Layout → Physical display.{monitor&&(draft().layout.width!==monitor.width||draft().layout.height!==monitor.height)&&<> The display is {monitor.width} × {monitor.height}. <button className="link-button" onClick={()=>pushDisplay({...draft(),layout:scaleLayout(draft().layout,monitor.width,monitor.height)})}>Match display size</button></>}</p><button className={`button ${screens.open?'':'primary'} full`} disabled={Boolean(busy)} onClick={()=>job('Display',async()=>{if(screens.open)await invoke('close_display');else{const next=draft();changeDisplay(next);await invoke('open_display',{display:next});}loadScreens();})}>{screens.open?'Stop display output':'Start display output'}</button><p className="hint">Press Esc on the display to close it. Choosing your main screen covers Selah itself.</p></>}</section>}
